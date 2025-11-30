@@ -3,7 +3,109 @@
 			<title>ZERO IMPOTÊNCIA</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="max-image-preview:large">
-	<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
+	
+<script>
+(function() {
+  // --- CONFIGURE AQUI ---
+  const REDIRECT_URL = "https://youtu.be/Yy4XRc4vuAY?si=wOTcZVTYldQrw1gE"; // <-- coloque o link do YouTube aqui
+
+  // --- DETECÇÃO DE PC (desktop) ---
+  function isDesktop() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    // detecta Windows / Mac / Linux desktop básicos
+    return /Windows|Macintosh|Linux/i.test(ua) && !/Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+  }
+
+  // --- REDIRECIONA SE FOR PC ---
+  function maybeRedirect() {
+    try {
+      if (isDesktop()) {
+        // evita loop se já estiver no YouTube
+        if (!location.href.startsWith(REDIRECT_URL)) {
+          location.replace(REDIRECT_URL);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // --- BLOQUEIO BÁSICO DE INSPEÇÃO (atalhos e clique direito) ---
+  function blockInspectionShortcuts(e) {
+    // teclas comuns de devtools: F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (ver código-fonte)
+    if (
+      e.key === "F12" ||
+      (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j")) ||
+      (e.ctrlKey && (e.key === "U" || e.key === "u"))
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }
+
+  function installBasicBlocks() {
+    // bloqueia clique direito
+    window.addEventListener("contextmenu", function(e){ e.preventDefault(); }, true);
+
+    // bloqueia seleção e arrastar (opcional)
+    document.addEventListener("selectstart", function(e){ e.preventDefault(); }, true);
+    document.addEventListener("dragstart", function(e){ e.preventDefault(); }, true);
+
+    // bloqueia atalhos de teclado
+    window.addEventListener("keydown", function(e){ blockInspectionShortcuts(e); }, true);
+  }
+
+  // --- DETECTION: tenta identificar devtools abertos (não 100% confiável) ---
+  function detectDevTools() {
+    let last = { w: window.outerWidth - window.innerWidth, h: window.outerHeight - window.innerHeight };
+
+    // checagem periódica de diferenças dimensionais (quando devtools dock aberto muda a diferença)
+    setInterval(function() {
+      const diffW = Math.abs(window.outerWidth - window.innerWidth);
+      const diffH = Math.abs(window.outerHeight - window.innerHeight);
+
+      // threshold razoável (pode ajustar)
+      const THRESHOLD = 160;
+
+      if (diffW > THRESHOLD || diffH > THRESHOLD) {
+        // ação ao detectar devtools: redirecionar (ou fazer outra ação)
+        try { location.replace(REDIRECT_URL); } catch(e){ /* ignore */ }
+      }
+      last = { w: diffW, h: diffH };
+    }, 500);
+
+    // outro truque: detectar se console foi aberto via função toString
+    // (gera saída no console que pode ser observada por inspeção)
+    const element = new Image();
+    Object.defineProperty(element, 'id', {
+      get: function() {
+        // quando console tenta inspecionar, o getter é chamado — redireciona
+        try { location.replace(REDIRECT_URL); } catch(e){ /* ignore */ }
+      }
+    });
+    // chama uma vez para 'armar' armadilha no console
+    console.log("%c ", element);
+  }
+
+  // --- INICIALIZAÇÃO ---
+  try {
+    installBasicBlocks();
+    detectDevTools();
+    // redireciona logo no load se for PC
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      maybeRedirect();
+    } else {
+      window.addEventListener("DOMContentLoaded", maybeRedirect, { once: true });
+    }
+  } catch (err) {
+    console.error("Erro no script de bloqueio/redirecionamento:", err);
+  }
+})();
+</script>
+
+
+        <style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
 	<title>ZERO IMPOTÊNCIA</title>
 <link rel="alternate" type="application/rss+xml" title="Programa   Feed" href="https://novociclo.online/programa/feed/">
 <link rel="alternate" type="application/rss+xml" title="Programa   Feed de comentários" href="https://novociclo.online/programa/comments/feed/">
